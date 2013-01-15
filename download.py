@@ -10,6 +10,9 @@ def make_nomads_suffix(dt):
 	tau=((dt.hour - base) // 3) * 3
 	return '{0}/{1}/nam_218_{1}_{2}_{3}.grb'.format(dt.strftime('%Y%m'), daymoyr, '%02d00' % base, '%03d' % tau)
 
+def make_local_name(dt):
+	return '{0}.grb'.format(dt.strftime('%Y%m%d%H'))
+
 def download(dt):
 	#http://nomads.ncdc.noaa.gov/data/meso-eta-hi/201212/20121229/nam_218_20121229_0000_000.grb
 	nomads_prefix='http://nomads.ncdc.noaa.gov/data/meso-eta-hi/'

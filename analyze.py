@@ -2,7 +2,7 @@ import pygrib
 import numpy as np
 from mpl_toolkits.basemap import Basemap, cm
 # requires netcdf4-python (netcdf4-python.googlecode.com)
-from netCDF4 import Dataset as NetCDFFile
+from netCDF4 import Dataset
 import matplotlib.pyplot as plt
 
 def find_index(lat, lon, grb):
@@ -33,6 +33,21 @@ def make_basemap(grb):
 	m.drawcountries()
 	m.drawstates()
 	return m
+
+def save_var(grb, var):
+	print var+'.nc'
+	d = Dataset(var+'.nc', 'w')
+	d.createDimension('x')
+	d.createDimension('y')
+	lats, lons = grb.latlons()
+	nc_var = d.createVariable(var, 'f4', ('x', 'y'))
+	nc_var[:] = grb.values
+	lat_var = d.createVariable('lats', 'f4', ('x', 'y'))
+	lat_var[:] = lats
+	lon_var = d.createVariable('lons', 'f4', ('x', 'y'))
+	lon_var[:] = lons
+	d.close()
+
 
 def mark_loc(grb, m, lat=38.551968, lon=-78.314666):
 	poly = m.tissot(lon,lat,0.02,100,facecolor='green',zorder=10,alpha=0.5)

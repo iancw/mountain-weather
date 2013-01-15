@@ -32,5 +32,10 @@ class TestDownload(unittest.TestCase):
             s=download.make_nomads_suffix(dt)
             self.assertEqual('201212/20121229/nam_218_20121229_0600_003.grb', s)
 
+    def test_local_name(self):
+        for hr in range(9, 11):
+            dt = datetime(2012, 12, 29, hr)
+            s=download.make_local_name(dt)
+            self.assertEqual('20121229%02d.grb' % hr, s)
 if __name__ == '__main__':
     unittest.main()
