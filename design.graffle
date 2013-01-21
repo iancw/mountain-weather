@@ -46,7 +46,7 @@
 	<key>Creator</key>
 	<string>Ian Will</string>
 	<key>DisplayScale</key>
-	<string>1 0/72 in = 1 0/72 in</string>
+	<string>1 0/72 in = 1.0000 in</string>
 	<key>GraphDocumentVersion</key>
 	<integer>8</integer>
 	<key>GraphicsList</key>
@@ -101,7 +101,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{226, 285}, {10, 14}}</string>
+			<string>{{227.5, 285}, {7, 14}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -140,7 +140,7 @@
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 M}</string>
+\f0\fs24 \cf0 1}</string>
 				<key>VerticalPad</key>
 				<integer>0</integer>
 			</dict>
@@ -159,8 +159,8 @@
 			<integer>51</integer>
 			<key>Points</key>
 			<array>
-				<string>{79.077730969432949, 168.2584034127826}</string>
-				<string>{106, 157}</string>
+				<string>{79.077730969432992, 168.25840341278257}</string>
+				<string>{104.15484027687705, 157.77161224785141}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -222,8 +222,8 @@
 			<integer>49</integer>
 			<key>Points</key>
 			<array>
-				<string>{124.67201628235637, 120.03376625930495}</string>
-				<string>{96.640839688369667, 104.56663804326567}</string>
+				<string>{124.67009690526115, 120.03444191622546}</string>
+				<string>{96.625253632876422, 104.57388436053712}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -1391,9 +1391,9 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2012-12-26 19:33:13 +0000</string>
+	<string>2013-01-20 20:42:28 +0000</string>
 	<key>Modifier</key>
-	<string>Ian Will</string>
+	<string>Ian &amp; Adrienne Will</string>
 	<key>NotesVisible</key>
 	<string>NO</string>
 	<key>Orientation</key>
@@ -1471,6 +1471,8 @@
 				<string>Canvas 1</string>
 			</dict>
 		</array>
+		<key>Frame</key>
+		<string>{{241, 252}, {778, 978}}</string>
 		<key>ListView</key>
 		<true/>
 		<key>OutlineWidth</key>
@@ -1483,6 +1485,8 @@
 		<true/>
 		<key>SidebarWidth</key>
 		<integer>120</integer>
+		<key>VisibleRegion</key>
+		<string>{{-34, -53}, {643, 839}}</string>
 		<key>Zoom</key>
 		<real>1</real>
 		<key>ZoomValues</key>

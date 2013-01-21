@@ -4,6 +4,45 @@ from mpl_toolkits.basemap import Basemap, cm
 # requires netcdf4-python (netcdf4-python.googlecode.com)
 from netCDF4 import Dataset
 import matplotlib.pyplot as plt
+import database
+from datetime import *
+import glob
+
+def process_all():
+	for f in glob.glob('*.grb'):
+		print "Processing %s" % f
+		process(f)
+
+def process(grb_file):
+	locs=database.get_locs()
+	grbs=pygrib.open(grb_file)
+
+	variables=[('Temperature', 'surface', 'air_temp'), 
+	('Soil Temperature', 'depthBelowLand', 'ground_temp'), 
+	('Soil Moisture', 'depthBelowLandLayer', 'soil_moisture')]
+	dt=datetime.now()
+	for v in variables:
+		dt=process_var(grbs.select(typeOfLevel=v[1],name=v[0])[0], locs, v[2])
+
+	for loc in locs:
+		database.add_record(loc['id'], dt, loc['air_temp'], loc['ground_temp'], loc['soil_moisture'])
+
+def plot_all():
+	(dates, air, ground, moist)=database.get_records(0)
+
+
+def process_var(temp, locs, key):
+	dt = find_date(temp)
+	data=temp.values
+	for loc in locs:
+		idx=find_index(loc['lat'], loc['lon'], temp)
+		t=data[idx[0], idx[1]]
+		print "%s at %s is %f" % (key, loc['name'], t)
+		loc[key]=t
+	return dt
+		
+def find_date(grb):
+	return datetime.strptime("%d%d" % (grb.dataDate, grb.dataTime), "%Y%m%d%H%M")
 
 def find_index(lat, lon, grb):
 	#lats and lons will have the same shape as data
@@ -11,6 +50,11 @@ def find_index(lat, lon, grb):
 	idx=((lats-lat)**2 + (lons-lon)**2).argmin()
 	return np.unravel_index(idx, lats.shape)
 
+# Other surface variables...
+# Total Precipitation, Convective precipitation (water), Snow Fall water equivalent, Snow depth water equivalent, Ice cover
+# Soil Temperature layer:  depthBelowLand
+# Soil Moisture:  depthBelowLandLayer
+# Orography
 def open(file):
 	grbs=pygrib.open(file)
 	grb=grbs.select(typeOfLevel='surface',name='Temperature')[0]
