@@ -4,12 +4,15 @@ from mpl_toolkits.basemap import Basemap, cm
 # requires netcdf4-python (netcdf4-python.googlecode.com)
 from netCDF4 import Dataset
 import matplotlib.pyplot as plt
+import matplotlib
+from matplotlib.dates import DateFormatter
 import database
 from datetime import *
 import glob
+from dateutil import tz
 
 def process_all():
-	for f in glob.glob('*.grb'):
+	for f in glob.glob('data/*.grb'):
 		print "Processing %s" % f
 		process(f)
 
@@ -19,30 +22,63 @@ def process(grb_file):
 
 	variables=[('Temperature', 'surface', 'air_temp'), 
 	('Soil Temperature', 'depthBelowLand', 'ground_temp'), 
-	('Soil Moisture', 'depthBelowLandLayer', 'soil_moisture')]
-	dt=datetime.now()
+	('Soil Moisture', 'depthBelowLandLayer', 'soil_moisture'),
+	('Total Precipitation', 'surface', 'precip'),
+	('Snow depth water equivalent', 'surface', 'snow_depth'),
+	('Snow Fall water equivalent', 'surface', 'snow_fall'),
+	('Albedo', 'surface', 'albedo'),
+	('Orography', 'surface', 'orography'),
+	]
+	dt = find_date(grbs.select(typeOfLevel='surface',name='Temperature')[0])
 	for v in variables:
-		dt=process_var(grbs.select(typeOfLevel=v[1],name=v[0])[0], locs, v[2])
+		process_var(grbs.select(typeOfLevel=v[1],name=v[0])[0], locs, v[2])
 
 	for loc in locs:
-		database.add_record(loc['id'], dt, loc['air_temp'], loc['ground_temp'], loc['soil_moisture'])
+		data_dic={}
+		for v in variables:
+			data_dic[v[2]] = loc[v[2]]
+		database.add_record(loc['id'], dt, data_dic)
 
-def plot_all():
-	(dates, air, ground, moist)=database.get_records(0)
+def kelvin_to_fahr(l):
+	return ((np.array(l) - 273.15) * 1.8) + 32.0
+
+def to_local(dates):
+	local=tz.gettz('America/New_York')
+	return [d.astimezone(local) for d in dates]
+
+def plot_all(loc_id):
+	(dates, data)=database.get_records(loc_id)
+	air_f = kelvin_to_fahr(data['air_temp'])
+	plot_dates = matplotlib.dates.date2num(to_local(dates))
+	plot_now = matplotlib.dates.date2num(datetime.now())
+	fig=plt.figure()
+	ax=fig.add_subplot(111)
+	ax.plot_date(plot_dates, air_f, '-', label='air_temp')
+	ax.fmt_xdata = DateFormatter('%Y-%m-%d %H:%M')
+	ax.axvline(x=plot_now)
+	ax.axhline(y=20)
+	ax.legend()
+
+	print plot_dates
+	print data['albedo']
+
+	ax2=ax.twinx()
+	ax2.plot_date(plot_dates, data['snow_depth'], '-g', label='snow_depth')
+	ax2.legend()
+	
+	plt.show()
 
 
 def process_var(temp, locs, key):
-	dt = find_date(temp)
 	data=temp.values
 	for loc in locs:
 		idx=find_index(loc['lat'], loc['lon'], temp)
 		t=data[idx[0], idx[1]]
 		print "%s at %s is %f" % (key, loc['name'], t)
 		loc[key]=t
-	return dt
 		
 def find_date(grb):
-	return datetime.strptime("%d%d" % (grb.dataDate, grb.dataTime), "%Y%m%d%H%M")
+	return datetime.strptime("%d%02d" % (grb.dataDate, grb.dataTime), "%Y%m%d%H%M") + timedelta(hours=grb.startStep)
 
 def find_index(lat, lon, grb):
 	#lats and lons will have the same shape as data
