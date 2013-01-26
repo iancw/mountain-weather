@@ -24,6 +24,7 @@ class Measurement(models.Model):
 	albedo = models.FloatField()
 	orography = models.FloatField()
 	location = models.ForeignKey(Location)
-
+	tau = models.IntegerField()
+	
 	class Meta:
 		unique_together = ('date', 'location')

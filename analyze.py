@@ -68,7 +68,6 @@ def plot_all(loc_id):
 	
 	plt.show()
 
-
 def process_var(temp, locs, key):
 	data=temp.values
 	for loc in locs:

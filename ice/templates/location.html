@@ -1,0 +1,6 @@
+{% load url from future %}
+<h3>{{ location.name }}</h3>
+
+{{ location.lat }}, {{ location.lon }}<br/>
+
+<a href="{% url 'index' %}">Map</a>

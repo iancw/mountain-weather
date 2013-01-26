@@ -4,6 +4,8 @@ import pygrib
 from datetime import *
 import numpy as np
 from dateutil import tz
+from django.utils.timezone import utc
+import re
 
 def populate_dc_locs():
 	l=Location(name='Overall Falls', lat=38.783360, lon=-78.295143)
@@ -14,10 +16,39 @@ def populate_dc_locs():
 	l.save()
 	l=Location(name='Finleys Folly', lat=37.911125, lon=-78.973633)
 	l.save()
+
+def parse_dt(filename):
+	m=re.match(r'.*(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})_(\d{3}).grb$', filename)
+	dt=datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4)), int(m.group(5)))
+	dt=dt+timedelta(hours=int(m.group(6)))
+	return dt.replace(tzinfo=utc)
+
+def parse_tau(filename):
+	m=re.match(r'.*(\d{4})(\d{2})(\d{2})_(\d{4})_(\d{3}).grb$', filename)
+	return int(m.group(5))
+
 #glob.glob('data/*.grb'):
 def populate(files):
-	print "Processing %s" % f
-	process(f)
+	for filename in files:
+		print "Processing %s" % filename
+		tau=parse_tau(filename)
+		dt=parse_dt(filename)
+		should_process=True
+		print "Looking for other measurements at {0}".format( dt )
+		for m in Measurement.objects.filter(date=dt):
+			print "Found measurement at {0} with tau {1}".format( m.date, m.tau )
+			should_process=False
+			#Process the new file if any of the old measurements at that date
+			# have a larger tau (if they are further from a base time)
+			if tau < m.tau:
+				should_process = True
+				break
+		if should_process:
+			for m in Measurement.objects.filter(date=dt):
+				m.delete()
+			process(filename)
+		else:
+			print "Data for  %s is already up to date" % filename
 
 def process(grb_file):
 	locs = Location.objects.all()
@@ -50,6 +81,7 @@ def process(grb_file):
 			data_dic[v[2]] = loc_data[loc][v[2]]
 		data_dic['date']=dt
 		data_dic['location']=loc
+		data_dic['tau']=parse_tau(grb_file)
 		print data_dic
 		m=Measurement(**data_dic)
 		m.save()
@@ -65,7 +97,8 @@ def process_var(temp, locs):
 	return loc_data
 
 def find_date(grb):
-	return datetime.strptime("%d%02d" % (grb.dataDate, grb.dataTime), "%Y%m%d%H%M") + timedelta(hours=grb.startStep)
+	dt= datetime.strptime("%d%02d" % (grb.dataDate, grb.dataTime), "%Y%m%d%H%M") + timedelta(hours=grb.startStep)
+	return dt.replace(tzinfo=utc)
 
 def find_index(lat, lon, grb):
 	#lats and lons will have the same shape as data
