@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load url from future %}
 
 {% block include_files %}
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
@@ -33,7 +34,7 @@ var marker = [];
 		title:"{{ loc.name }}"
 	});
 	google.maps.event.addListener(marker[ {{ forloop.counter0 }} ], 'click', function() {
-		var infowindow = new google.maps.InfoWindow({ content: "<h3>{{ loc.name }}</h3>{{ loc.lat }}, {{ loc.lon }}<br/><a href=\"{% url detail loc.id %}\">Details</a>" });
+		var infowindow = new google.maps.InfoWindow({ content: "<h3>{{ loc.name }}</h3>{{ loc.lat }}, {{ loc.lon }}<br/><a href=\"{% url 'detail' loc.id %}\">Details</a>" });
 		infowindow.open(map,marker[ {{ forloop.counter0 }} ]);
     });
 {% endfor %}

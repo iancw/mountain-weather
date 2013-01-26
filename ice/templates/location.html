@@ -1,6 +1,56 @@
+{% extends "base.html" %}
 {% load url from future %}
+{% load ice_extras %}
+
+{% block include_files %}
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+      html { height: 100% }
+      body { height: 100%; margin: 0; padding: 0 }
+      #map_canvas { height: 100% }
+    </style>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load('visualization', '1', {packages: ['corechart']});
+    </script>
+<script type="text/javascript">
+
+function initialize(){
+	  // Create and populate the data table.
+  var data = google.visualization.arrayToDataTable([
+    ['x', 'Air Temperature'],
+    {% spaceless %}
+    {% for meas in measurements %}
+    ["{{ meas.date }}", {{ meas.air_temp|to_fahrenheit }}]{% if not forloop.last %},{% endif %}
+    {% endfor %}
+    {% endspaceless %}
+  ]);
+
+  // Create and draw the visualization.
+  new google.visualization.LineChart(document.getElementById('chart')).
+      draw(data, {curveType: "function",
+                  width: 800, height: 400,
+                  vAxis: {maxValue: 10}}
+          );
+}
+
+window.onload = initialize;
+</script>
+{% endblock %}
+
+{% block title %}{{ location.name }} Conditions{% endblock %}
+
+{% block content %}
+
 <h3>{{ location.name }}</h3>
 
 {{ location.lat }}, {{ location.lon }}<br/>
 
+
+<div id="chart" style="width:800px; height:400px"></div>
+
+
 <a href="{% url 'index' %}">Map</a>
+
+{% endblock %}
+

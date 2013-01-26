@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.template import Context, loader
 from django.shortcuts import render
 
-from conditions.models import Location
+from conditions.models import Location, Measurement
 
 def index(request):
 	locations = Location.objects.all()
@@ -11,5 +11,6 @@ def index(request):
 
 def detail(request, location_id):
 	location = Location.objects.get(pk=location_id)
-	context = {'location': location}
+	meas = Measurement.objects.filter(location=location)
+	context = {'location': location, 'measurements': meas}
 	return render(request, 'location.html', context)
