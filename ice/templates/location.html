@@ -17,7 +17,7 @@
 
 function initialize(){
 	  // Create and populate the data table.
-  var data = google.visualization.arrayToDataTable([
+  var temp_data = google.visualization.arrayToDataTable([
     ['x', 'Air Temperature'],
     {% spaceless %}
     {% for meas in measurements %}
@@ -27,10 +27,40 @@ function initialize(){
   ]);
 
   // Create and draw the visualization.
-  new google.visualization.LineChart(document.getElementById('chart')).
-      draw(data, {curveType: "function",
-                  width: 800, height: 400,
+  new google.visualization.LineChart(document.getElementById('temp_chart')).
+      draw(temp_data, {curveType: "function",
+                  width: 1200, height: 400,
                   vAxis: {maxValue: 10}}
+          );
+
+var snow_data = google.visualization.arrayToDataTable([
+    ['x', 'Snow depth'],
+    {% spaceless %}
+    {% for meas in measurements %}
+    ["{{ meas.date }}", {{ meas.snow_depth }}]{% if not forloop.last %},{% endif %}
+    {% endfor %}
+    {% endspaceless %}
+  ]);
+
+  // Create and draw the visualization.
+  new google.visualization.LineChart(document.getElementById('snow_chart')).
+      draw(snow_data, {curveType: "function",
+                  width: 1200, height: 400}
+          );
+
+var fall_data = google.visualization.arrayToDataTable([
+    ['x', 'Soil moisture'],
+    {% spaceless %}
+    {% for meas in measurements %}
+    ["{{ meas.date }}", {{ meas.soil_moisture }}]{% if not forloop.last %},{% endif %}
+    {% endfor %}
+    {% endspaceless %}
+  ]);
+
+  // Create and draw the visualization.
+  new google.visualization.LineChart(document.getElementById('fall_chart')).
+      draw(fall_data, {curveType: "function",
+                  width: 1200, height: 400}
           );
 }
 
@@ -47,7 +77,9 @@ window.onload = initialize;
 {{ location.lat }}, {{ location.lon }}<br/>
 
 
-<div id="chart" style="width:800px; height:400px"></div>
+<div id="temp_chart" style="width:1200px; height:400px"></div>
+<div id="snow_chart" style="width:1200px; height:400px"></div>
+<div id="fall_chart" style="width:1200px; height:400px"></div>
 
 
 <a href="{% url 'index' %}">Map</a>
