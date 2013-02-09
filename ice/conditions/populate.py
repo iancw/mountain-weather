@@ -46,7 +46,11 @@ def populate(files):
 		if should_process:
 			for m in Measurement.objects.filter(date=dt):
 				m.delete()
-			process(filename)
+			try:
+				process(filename)
+			except ValueError as e:
+				print "Could not process {0}".format(filename)
+				print(e)
 		else:
 			print "Data for  %s is already up to date" % filename
 
