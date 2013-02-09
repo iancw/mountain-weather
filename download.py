@@ -40,14 +40,16 @@ def update():
 	download_forecasts()
 
 def find_most_recent_base():
-	for dt in [datetime.now(), datetime.now()-timedelta(days=1)]:
+	for dt in [datetime.now(), datetime.now()-timedelta(days=1), datetime.now()-timedelta(days=2), datetime.now()-timedelta(days=3), datetime.now()-timedelta(days=4)]:
 		for base in [18, 12, 6, 0]:
-			date_suffix=make_nomads_suffix(dt, base, 0)
-			try:
-				u = urllib2.urlopen(nomads_prefix + date_suffix)	
-				return datetime(dt.year, dt.month, dt.day, base, 0)
-			except:
-				pass
+			for t in range(0, 6):
+				date_suffix=make_nomads_suffix(dt, base, t)
+				try:
+					print 'trying ...{0}{1}...'.format(nomads_prefix,  date_suffix)
+					u = urllib2.urlopen('{0}{1}'.format(nomads_prefix, date_suffix))
+					return datetime(dt.year, dt.month, dt.day, base, t)
+				except:
+					pass
 	raise StandardError('Could not find a recent base')
 
 def parse_tau(filename):
@@ -65,8 +67,12 @@ def remove_old_forecasts():
 # to tau 84 at 3 hour steps
 def download_forecasts():
 	d=find_most_recent_base()
-	for t in xrange(0, 85, 3):
-		download_suffix(make_nomads_suffix(d, d.hour, t))
+	for t in xrange(0, 85, 1):
+		suf=make_nomads_suffix(d, d.hour, t)
+		try:
+			download_suffix(suf)
+		except:
+			print 'problems downloading {0}'.format(suf)
 
 def download(dt):
 	date_suffix=make_nomads_suffix_dt(dt)
@@ -74,12 +80,11 @@ def download(dt):
 
 def download_suffix(date_suffix):
 	#201212/20121229/nam_218_20121229_0000_000.grb')
-	fname = 'data/'+os.path.basename(date_suffix)
-	print 'Opening {0}...'.format(nomads_prefix + date_suffix)
+	fname = 'data/'+os.path.basename(date_suffix)	
 	u = urllib2.urlopen(nomads_prefix + date_suffix)	
 	if os.path.isfile(fname):
-		print 'File {0} already exists'.format(fname)
 		return
+	print 'Opening {0}...'.format(nomads_prefix + date_suffix)		
 	localFile = open(fname, 'w')
 	print 'Reading {0}...'.format(nomads_prefix + date_suffix)
 	st=datetime.now()
