@@ -6,40 +6,48 @@ import glob
 import re
 
 #http://nomads.ncdc.noaa.gov/data/meso-eta-hi/201212/20121229/nam_218_20121229_0000_000.grb
-nomads_prefix='http://nomads.ncdc.noaa.gov/data/meso-eta-hi/'
+#http://nomads.ncdc.noaa.gov/data/rap130/201303/20130323/rap_130_20130323_2300_018.grb2
+#nomads_prefix='http://nomads.ncdc.noaa.gov/data/meso-eta-hi/'
+nomads_prefix='http://nomads.ncdc.noaa.gov/data/rap130/'
 
 #201212/20121229/nam_218_20121229_0000_000.grb
 def make_nomads_suffix_dt(dt):
-	base=(dt.hour // 6) * 6 # Use integer division to find nearest base time...
-	tau=((dt.hour - base) // 3) * 3
+	#base=(dt.hour // 6) * 6 # Use integer division to find nearest base time...
+	#tau=((dt.hour - base) // 3) * 3
+        # RAP has base times every hour
+        base = dt.hour
+        tau = 0
 	return make_nomads_suffix(dt, base, tau)
 	
 #base='0000' #0, 6, 12, 18.  four digits zero padded
 #tau='000' #3 hour intervals, three digits zero padded
 def make_nomads_suffix(dt, base, tau):
 	daymoyr = dt.strftime('%Y%m%d')
-	return '{0}/{1}/nam_218_{1}_{2}_{3}.grb'.format(dt.strftime('%Y%m'), daymoyr, '%02d00' % base, '%03d' % tau)
+	return '{0}/{1}/rap_130_{1}_{2}_{3}.grb2'.format(dt.strftime('%Y%m'), daymoyr, '%02d00' % base, '%03d' % tau)
 
 def make_local_name(dt):
-	return '{0}.grb'.format(dt.strftime('%Y%m%d%H'))
+	return '{0}.grb2'.format(dt.strftime('%Y%m%d%H'))
 
 def download_history():
 	#just jan for now...
 	beg=datetime(2013, 12, 1, 0)
 	n=datetime.now()
+        download_history_between(beg, n)
+
+def download_history_between(beg, n):
 	try:
 		while (beg < n):
 			download(datetime(beg.year, beg.month, beg.day, beg.hour))
-			beg = beg + timedelta(hours=3)
+			beg = beg + timedelta(hours=1)
 	except:
 		raise
 
-def update():
+def update_nam():
 	download_history()
 	remove_old_forecasts()
 	download_forecasts()
 
-def find_most_recent_base():
+def find_most_recent_nam_base():
 	for dt in [datetime.now(), datetime.now()-timedelta(days=1), datetime.now()-timedelta(days=2), datetime.now()-timedelta(days=3), datetime.now()-timedelta(days=4)]:
 		for base in [18, 12, 6, 0]:
 			for t in range(0, 6):
@@ -65,8 +73,8 @@ def remove_old_forecasts():
 
 #Downloads all gribs from the previous days 18 base time out
 # to tau 84 at 3 hour steps
-def download_forecasts():
-	d=find_most_recent_base()
+def download_nam_forecasts():
+	d=find_most_recent_nam_base()
 	for t in xrange(0, 85, 1):
 		suf=make_nomads_suffix(d, d.hour, t)
 		try:
