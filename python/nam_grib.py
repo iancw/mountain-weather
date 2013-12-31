@@ -21,6 +21,7 @@ class nam_grib:
 			inv.append({'paramId':int(vals[0]), 'shortName': vals[3], 'level':vals[4], 'desc':vals[-1] })
 		return np.array(inv)
 
+	# This needs to be fixed.  The variable names no longer match.  Use Geopotential height (HGT) at sfc for 'orography'...
 	def test(self):
 		variables=[('Temperature', 'surface', 'air_temp'), 
 		('Soil Temperature', 'depthBelowLand', 'ground_temp'), 

@@ -25,14 +25,14 @@ def make_local_name(dt):
 
 def download_history():
 	#just jan for now...
-	beg=datetime(2013, 1, 1, 0)
+	beg=datetime(2013, 12, 1, 0)
 	n=datetime.now()
 	try:
 		while (beg < n):
 			download(datetime(beg.year, beg.month, beg.day, beg.hour))
 			beg = beg + timedelta(hours=3)
 	except:
-		pass
+		raise
 
 def update():
 	download_history()

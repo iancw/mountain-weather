@@ -16,6 +16,8 @@ def populate_dc_locs():
 	l.save()
 	l=Location(name='Finleys Folly', lat=37.911125, lon=-78.973633)
 	l.save()
+	l=Location(name='Hawksbill', lat=38.596, lon=-78.259) # Grid cell 470,227
+	l.save()
 
 def parse_dt(filename):
 	m=re.match(r'.*(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})_(\d{3}).grb$', filename)
