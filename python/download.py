@@ -89,14 +89,17 @@ def download(dt):
 def download_suffix(date_suffix):
 	#201212/20121229/nam_218_20121229_0000_000.grb')
 	fname = 'data/'+os.path.basename(date_suffix)
-	u = urllib2.urlopen(nomads_prefix + date_suffix)
 	if os.path.isfile(fname):
 		return
 	print 'Opening {0}...'.format(nomads_prefix + date_suffix)
-	localFile = open(fname, 'w')
-	print 'Reading {0}...'.format(nomads_prefix + date_suffix)
-	st=datetime.now()
-	localFile.write(u.read())
-	en=datetime.now()
-	localFile.close()
-	print 'Downloaded in %.2f seconds' % (en-st).total_seconds()
+	try:
+		u = urllib2.urlopen(nomads_prefix + date_suffix)
+		localFile = open(fname, 'w')
+		print 'Reading {0}...'.format(nomads_prefix + date_suffix)
+		st=datetime.now()
+		localFile.write(u.read())
+		en=datetime.now()
+		localFile.close()
+		print 'Downloaded in %.2f seconds' % (en-st).total_seconds()
+	except urllib2.HTTPError:
+		print 'Could not open {0}'.format(nomads_prefix + date_suffix)
