@@ -32,3 +32,4 @@ def download_time(dt):
   tmp_file = open(file_name, 'w')
   tmp_file.write(u.read())
   tmp_file.close()
+  return file_name
