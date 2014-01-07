@@ -26,10 +26,14 @@ def build_path(dt):
 
 def download_time(dt):
   path=build_path(dt)
+  file_name = leaf_file(dt)
+  if os.path.exists(os.path.join('.', file_name)):
+    print "File {0} already present, returning".format(path)
+    return file_name
   print "Downloading {0}".format(path)
   u = urllib2.urlopen(path)
-  file_name = leaf_file(dt)
   tmp_file = open(file_name, 'w')
   tmp_file.write(u.read())
   tmp_file.close()
   return file_name
+
