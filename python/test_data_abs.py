@@ -20,5 +20,9 @@ class TestGribDatabase(unittest.TestCase):
   def test_default_levels(self):
     self.assertEquals(6, len(self.gd.params))
 
+  def test_date_for_file(self):
+    dt = datetime(2013, 1, 6, 13)
+    self.assertEquals(dt, self.gd.date_for_file('hrrr_2013_01_06_1300.grb2'))
+
 if __name__ == '__main__':
   unittest.main()

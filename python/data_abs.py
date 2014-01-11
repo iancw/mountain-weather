@@ -5,24 +5,20 @@ import os.path
 from datetime import *
 import urllib2
 import pygrib
+from record_db import ParamAndLevel
+from record_db import default_levels
+import re
+from grib import Grib
+
+class HRRR:
+  def fetch_time(self, dtime):
+    '''
+    Tries to download a file from HRRR, then falls back to RAP if that fails
+    '''
+    return fetch_hrrr.download_time(dtime)
+
+
 # class that abstracts GRIB data
-
-class ParamAndLevel:
-  def __init__(self, shortName, fullName, level):
-    self.shortName = shortName
-    self.fullName = fullName
-    self.level = level
-
-def default_levels():
-  #surface_names=['t', 'acpcp', 'gust', 'sdwe']
-  #agl_names=['10u', '10v']
-  return [ParamAndLevel('t', 'Temperature', 'surface'),
-      ParamAndLevel('acpcp', 'Convective precip', 'surface'),
-      ParamAndLevel('gust', 'Wind Gust', 'surface'),
-      ParamAndLevel('sdwe', 'Snow Depth', 'surface'),
-      ParamAndLevel('10u', 'Wind Speed U', 'heightAboveGround'),
-      ParamAndLevel('10v', 'Wind Speed V', 'heightAboveGround')]
-
 class GribDatabase:
   """Represents GRIB records from online data sources.
   The goal is to make access seamless; if a GRIB is not
@@ -30,13 +26,33 @@ class GribDatabase:
   and placed into the local database.
   """
 
-  def __init__(self, data_dir, params=default_levels(), season_start=datetime(2013, 11, 1)):
+  def __init__(self, data_dir, params=default_levels()):
     self.data_dir = data_dir
     self.params = params
-    self.season_start = season_start
+    self.date_fmt='%Y_%m_%d_%H%M'
+    self.fetcher = HRRR()
 
-  def local_hrrr_name(self, dt):
-    return "hrrr_{0}.grb2".format(dt.strftime('%Y_%m_%d_%H%M'))
+  def leaf_name(self, dt):
+    return "{0}.grb2".format(dt.strftime(self.date_fmt))
+
+  def local_path(self, dt):
+    return os.path.join(self.data_dir, self.leaf_name(dt))
+
+  def date_for_file(self, fle):
+    m = re.search('(\d{4}_\d{2}_\d{2}_\d{2}\d{2})\.', fle)
+    return datetime.strptime(m.group(1), self.date_fmt)
+
+  def make_local(self, dt):
+    local = self.local_path(dt)
+    if not os.path.exists(local):
+      print "Local file %s does not exist, attempting to download" % local
+      tf = self.fetcher.fetch_time(dt)
+      # Create sub-GRIB with only parameters of interest
+      local = self.create_sub(tf, dt)
+    return local
+
+  def read(self, dtime):
+    return Grib(self.make_local(dtime))
 
   def download_all_hrrr(self):
     """
@@ -50,7 +66,7 @@ class GribDatabase:
     while not working:
       try:
         print "Trying {0}".format(date_time)
-        self.fetch_and_process_hrrr(date_time)
+        self.make_local(date_time)
         working = True
       except urllib2.HTTPError:
         working = False
@@ -58,13 +74,11 @@ class GribDatabase:
     while working:
       try:
         date_time = date_time - dt
-        self.fetch_and_process_hrrr(date_time)
+        self.make_local(date_time)
       except urllib2.HTTPError:
         working = False
     return date_time
 
-  def local_filename(self, dt):
-    return os.path.join(self.data_dir, self.local_hrrr_name(dt))
 
   def create_sub(self, full_grib, dt):
     ''' Extracts a subset of GRIB records from full_grib and
@@ -72,7 +86,7 @@ class GribDatabase:
     the data_dir folder.
     '''
     name, ext = os.path.splitext(full_grib)
-    out_file = self.local_filename(dt)
+    out_file = self.local_path(dt)
     grbout = open(out_file, 'wb')
 
     grbs = pygrib.open(full_grib)
@@ -87,11 +101,4 @@ class GribDatabase:
     grbout.close()
     return out_file
 
-  def fetch_and_process_hrrr(self, dt):
-    local = self.local_filename(dt)
-    if not os.path.exists(local):
-      tf = fetch_hrrr.download_time(dt)
-      # Create sub-GRIB with only parameters of interest
-      local = self.create_sub(tf, dt)
-    return local
 
