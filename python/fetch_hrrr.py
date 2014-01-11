@@ -30,7 +30,7 @@ class HRRR:
     return '{0}/{1}'.format(self.time_format(dt), self.leaf_file(dt))
 
   def build_path(self, dt):
-    return '{0}/{1}'.format(self.root(), self.sub_path(dt))
+    return '{0}/{1}'.format(self.root, self.sub_path(dt))
 
 
 class RAP:
@@ -48,29 +48,31 @@ class RAP:
     return '{0}/{1}'.format(yrmo(dt), yrmoday(dt))
 
   def leaf_file(self, dt):
-    return self.leaf_file(dt, 0, 0)
+    return self.leaf_file_base_tau(dt, 0, 0)
 
   # E.g. rap_130_20130323_2300_018.grb2
-  def leaf_file(self, dt, base, tau):
+  def leaf_file_base_tau(self, dt, base, tau):
     ''' Returns a local filename for the given time'''
     daymoyr = dt.strftime('%Y%m%d')
-    return 'rap_130_{1}_{2}_{3}.grb2'.format(daymoyr, '%02d00' % base, '%03d' % tau)
+    return 'rap_130_{0}_{1}_{2}.grb2'.format(daymoyr, '%02d00' % base, '%03d' % tau)
 
 class NOAAFetch:
 
-  def __init__(self, path_builder):
+  def __init__(self, path_builder, base='.'):
     self.path_builder = path_builder
+    self.data_dir = base
 
   def download_time(self, dt):
     path=self.path_builder.build_path(dt)
     file_name = self.path_builder.leaf_file(dt)
-    if os.path.exists(os.path.join('.', file_name)):
-      print "File {0} already present, returning".format(path)
-      return file_name
+    local_path = os.path.join(self.data_dir, file_name)
+    if os.path.exists(local_path):
+      print "File {0} already present, returning".format(local_path)
+      return local_path
     print "Downloading {0}".format(path)
     u = urllib2.urlopen(path)
-    tmp_file = open(file_name, 'w')
+    tmp_file = open(local_path, 'w')
     tmp_file.write(u.read())
     tmp_file.close()
-    return file_name
+    return local_path
 

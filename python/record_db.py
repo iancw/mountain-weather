@@ -77,6 +77,12 @@ class RecordDB:
     session = self.make_session()
     return session.query(Location).order_by(Location.id).all()
 
+  def has_record(self, loc, time):
+    session = self.make_session()
+    meas = session.query(Measurement).filter(and_(Measurement.location_id == loc.id,
+      Measurement.date == time))
+    return meas.count() > 0
+
   def add_record(self, measurement):
     session = self.make_session()
     session.add(measurement)

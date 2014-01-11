@@ -13,8 +13,8 @@ from grib import Grib
 class Hybrid:
 
   def __init__(self):
-    self.hrrr = NOAAFetch(HRRR())
-    self.rap = NOAAFetch(RAP())
+    self.hrrr = NOAAFetch(HRRR(), base='../hrrr')
+    self.rap = NOAAFetch(RAP(), base='../rap')
 
   def fetch_time(self, dtime):
     '''
@@ -23,6 +23,7 @@ class Hybrid:
     try:
       return self.hrrr.download_time(dtime)
     except urllib2.HTTPError:
+      print "Downloading from HRR failed, trying RAP..."
       return self.rap.download_time(dtime)
 
 # class that abstracts GRIB data
@@ -37,7 +38,7 @@ class GribDatabase:
     self.data_dir = data_dir
     self.params = params
     self.date_fmt='%Y_%m_%d_%H%M'
-    self.fetcher = HRRR()
+    self.fetcher = Hybrid()
 
   def leaf_name(self, dt):
     return "{0}.grb2".format(dt.strftime(self.date_fmt))

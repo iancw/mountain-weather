@@ -15,15 +15,11 @@ class Updater:
     self.gribs = gribs
     self.locs = self.db.locs()
 
-  def up_to_now(self):
-    last = self.db.last_record()
-    if last is None:
-      last = datetime.datetime(2014, 1, 4, 16)
-    print "starting from {0}".format(last)
-    now = datetime.datetime.utcnow()
+
+  def fetch_data_between(self, start, end):
     delta = datetime.timedelta(hours=1)
-    cur = last + delta
-    while cur < now:
+    cur = start
+    while cur < end:
       try:
         self.add_record(cur)
         self.db.commit()
@@ -31,9 +27,13 @@ class Updater:
         print "failed to download %s: %s" % (cur.strftime("%Y-%m-%d-%H%M"),  sys.exc_info()[0])
       cur = cur + delta
 
+
   def add_record(self, dtime):
     for loc in self.locs:
-      self.db.add_record(self.build_meas(dtime, loc))
+      if self.db.has_record(loc, dtime):
+        print "Record at {0}, {1} already present, skipping".format(loc.name, dtime)
+      else:
+        self.db.add_record(self.build_meas(dtime, loc))
 
   def build_meas(self, dtime, loc):
     print "Building measurement for %s at %s" % (dtime.strftime('%Y-%m-%d-%H%M'), loc.name)
@@ -43,22 +43,28 @@ class Updater:
         wind_speed=grb.wind_speed(loc.lat, loc.lon),
         location_id=loc.id)
 
-def run_up_to_now():
+def up_to_now(self):
+  season_start = datetime.datetime(2014, 1, 4, 16)
+  now = datetime.datetime.utcnow()
+  ensure_dta_between(season_start, now)
+
+def ensure_data_between(s, e):
   need_init = False
   if not os.path.exists('test.db'):
     need_init = True
   db = record_db.connect("sqlite:///test.db")
   if need_init:
     record_db.init_database(db)
-  gribs = GribDatabase('./data/')
+  gribs = GribDatabase('../data/')
   u = Updater(db, gribs)
-  u.up_to_now()
+  u.fetch_data_between(s, e)
+
 
 def query_temps():
-  run_up_to_now()
   db = record_db.connect("sqlite:///test.db")
   s = datetime.datetime(2013, 3, 15, 0)
   e = datetime.datetime(2013, 3, 31, 0)
+  ensure_data_between(s, e)
   kat = db.locs()[-2]
   time_ser = db.air_temps(kat, s, e)
   dates, temps = np.transpose(time_ser)
