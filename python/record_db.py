@@ -5,6 +5,9 @@ from sqlalchemy import Column, Integer, String, DateTime, Float
 from sqlalchemy import func
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, backref
+from sqlalchemy import desc
+from sqlalchemy import and_
+import numpy as np
 
 Base = declarative_base()
 
@@ -72,7 +75,7 @@ class RecordDB:
 
   def locs(self):
     session = self.make_session()
-    return session.query(Location).order_by(Location.id)
+    return session.query(Location).order_by(Location.id).all()
 
   def add_record(self, measurement):
     session = self.make_session()
@@ -92,23 +95,24 @@ class RecordDB:
     ''' Returns datetime of last record
     '''
     session = self.make_session()
-    measurements = session.query(Measurement).order_by(Measurement.date)
-    print "QUERY RETURNED:  ", measurements
-    print "COUNT IS ", measurements.count()
-    print "END QUERY"
+    measurements = session.query(Measurement).order_by(desc(Measurement.date)).limit(1)
     if measurements.count() == 0:
       return None
-    print "FIRST: ", measurements[0].date
-    print "LAST: ", measurements[-1].date
-    return measurements[-1].date
+    return measurements[0].date
 
   def make_session(self):
     Session = sessionmaker(bind=self.engine)
     return Session()
 
-  def get_records(self, loc, param, start, end):
+  def air_temps(self, loc, start, end):
+    return self.measurements(loc, lambda m: (m.date, m.air_temp), start, end)
+
+  def measurements(self, loc, param_lambd, start, end):
     session = self.make_session()
-    return session.query(Measurement)
+    meas = session.query(Measurement).filter(and_(Measurement.location_id == loc.id,
+      Measurement.date > start,
+      Measurement.date < end))
+    return np.array([ param_lambd(m) for m in meas])
 
   def populate_dc_locs(self):
     session = self.make_session()

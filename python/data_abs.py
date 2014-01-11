@@ -1,4 +1,4 @@
-import fetch_hrrr
+from fetch_hrrr import NOAAFetch, HRRR, RAP
 import download
 import sub_grib
 import os.path
@@ -10,13 +10,20 @@ from record_db import default_levels
 import re
 from grib import Grib
 
-class HRRR:
+class Hybrid:
+
+  def __init__(self):
+    self.hrrr = NOAAFetch(HRRR())
+    self.rap = NOAAFetch(RAP())
+
   def fetch_time(self, dtime):
     '''
     Tries to download a file from HRRR, then falls back to RAP if that fails
     '''
-    return fetch_hrrr.download_time(dtime)
-
+    try:
+      return self.hrrr.download_time(dtime)
+    except urllib2.HTTPError:
+      return self.rap.download_time(dtime)
 
 # class that abstracts GRIB data
 class GribDatabase:

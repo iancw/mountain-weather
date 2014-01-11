@@ -7,18 +7,11 @@
     - Install pyproj (I'm using 1.9.3)
     - Install pygrib (using 1.9.8)
 
-=== Download data from NOAA
+=== Basic Testing
 
-(edit download.py line 28 with appropriate minimum time)
-mkdir data
-python
->> import download
->> download.download_history()
-(this will take awhile, and fill the data directory you create with grib files)
+python harness.py
 
-=== Initialize Database
-
-python manage.py shell
-import conditions.populate
-
+ - Creates a SQLite database in current dir test.db
+ - Fills with data
+ - Plots temps from Katahdin
 
