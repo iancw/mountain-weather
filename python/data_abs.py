@@ -1,4 +1,4 @@
-from fetch_hrrr import NOAAFetch, HRRR, RAP
+from fetch_hrrr import NOAAFetch, HRRR, RAP, NAM
 import download
 import sub_grib
 import os.path
@@ -15,6 +15,7 @@ class Hybrid:
   def __init__(self):
     self.hrrr = NOAAFetch(HRRR(), base='../hrrr')
     self.rap = NOAAFetch(RAP(), base='../rap')
+    self.nam = NOAAFetch(NAM(), base='../nam')
 
   def fetch_time(self, dtime):
     '''
@@ -24,7 +25,11 @@ class Hybrid:
       return self.hrrr.download_time(dtime)
     except urllib2.HTTPError:
       print "Downloading from HRR failed, trying RAP..."
-      return self.rap.download_time(dtime)
+      try:
+        return self.rap.download_time(dtime)
+      except urllib2.HTTPError:
+        print "Download from RAP failed, trying NAM..."
+        return self.nam.download_time(dtime)
 
 # class that abstracts GRIB data
 class GribDatabase:
@@ -96,6 +101,7 @@ class GribDatabase:
     name, ext = os.path.splitext(full_grib)
     out_file = self.local_path(dt)
     grbout = open(out_file, 'wb')
+    print 'creating sub file from ' + full_grib
 
     grbs = pygrib.open(full_grib)
     for param in self.params:

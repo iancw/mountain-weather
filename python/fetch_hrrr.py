@@ -38,10 +38,13 @@ class RAP:
   def __init__(self):
     self.root='http://nomads.ncdc.noaa.gov/data/rap130'
 
+  def get_root(self):
+    return self.root
+
   # e.g. http://nomads.ncdc.noaa.gov/data/rap130/201303/20130323/rap_130_20130323_2300_018.grb2
   def build_path(self, dt):
     ''' Returns the full URL to the remote resource '''
-    return '{0}/{1}/{2}'.format(self.root, self.sub_path(dt), self.leaf_file(dt))
+    return '{0}/{1}/{2}'.format(self.get_root(), self.sub_path(dt), self.leaf_file(dt))
 
   # e.g. 201303/20130323
   def sub_path(self, dt):
@@ -53,8 +56,19 @@ class RAP:
   # E.g. rap_130_20130323_2300_018.grb2
   def leaf_file_base_tau(self, dt, base, tau):
     ''' Returns a local filename for the given time'''
-    daymoyr = dt.strftime('%Y%m%d')
-    return 'rap_130_{0}_{1}_{2}.grb2'.format(daymoyr, '%02d00' % base, '%03d' % tau)
+    return 'rap_130_{0}_{1}_{2}.grb2'.format(yrmoday(dt), '%02d00' % base, '%03d' % tau)
+
+class NAM(RAP):
+
+  def __init__(self):
+    self.root = 'http://nomads.ncdc.noaa.gov/data/namanl'
+
+  def get_root(self):
+    return self.root
+
+  def leaf_file_base_tau(self, dt, base, tau):
+    return 'namanl_218_{0}_{1}_{2}.grb'.format(\
+        yrmoday(dt), '%02d00' % base, '%03d' % tau)
 
 class NOAAFetch:
 

@@ -7,6 +7,7 @@ import urllib2
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
+import traceback
 
 class Updater:
 
@@ -24,14 +25,16 @@ class Updater:
         self.add_record(cur)
         self.db.commit()
       except (urllib2.HTTPError, ValueError):
-        print "failed to download %s: %s" % (cur.strftime("%Y-%m-%d-%H%M"),  sys.exc_info()[0])
+        print "failed to download %s: %s" % (cur.strftime("%Y-%m-%d-%H%M"),  sys.exc_info())
+        traceback.print_exc()
       cur = cur + delta
 
 
   def add_record(self, dtime):
     for loc in self.locs:
       if self.db.has_record(loc, dtime):
-        print "Record at {0}, {1} already present, skipping".format(loc.name, dtime)
+        #print "Record at {0}, {1} already present, skipping".format(loc.name, dtime)
+        pass
       else:
         self.db.add_record(self.build_meas(dtime, loc))
 
@@ -59,17 +62,24 @@ def ensure_data_between(s, e):
   u = Updater(db, gribs)
   u.fetch_data_between(s, e)
 
+def hour_diff(frm, to):
+  td = to - frm
+  return td.days * 24.0 + td.seconds / 3600.0
+
+def plot_temp(db, loc, s, e):
+  ensure_data_between(s, e)
+  dates, temps = db.air_temps(loc, s, e)
+  temps = (temps - 273.15) * 1.8 + 32
+  date_offsets = np.array([ hour_diff(s, d) for d in dates])
+  plt.plot(dates, temps)
 
 def query_temps():
   db = record_db.connect("sqlite:///test.db")
-  s = datetime.datetime(2013, 3, 15, 0)
-  e = datetime.datetime(2013, 3, 31, 0)
-  ensure_data_between(s, e)
   kat = db.locs()[-2]
-  time_ser = db.air_temps(kat, s, e)
-  dates, temps = np.transpose(time_ser)
-  temps = (temps - 273.15) * 1.8 + 32
-  plt.plot(dates, temps)
+  s = datetime.datetime(2014, 1, 1, 0)
+  e = datetime.datetime(2014, 1, 11, 0)
+  plot_temp(db, kat, s, e)
+
   plt.title("Temperature (F) at {0}".format(kat.name))
   plt.show()
 

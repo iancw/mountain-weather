@@ -33,6 +33,8 @@ class Grib:
     self.grbs = pygrib.open(grb_file)
 
   def value(self, param_lev, lat, lon):
+    self.grbs.seek(0)
+    print "Searcing {2} for typeofLevel={0}, shortName={1}".format(param_lev.level, param_lev.shortName, self.grb_file)
     grb = GribRec(self.grbs.select(typeOfLevel=param_lev.level, shortName=param_lev.shortName)[0])
     return grb.value(lat, lon)
 

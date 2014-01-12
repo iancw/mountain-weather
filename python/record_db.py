@@ -44,16 +44,16 @@ def default_levels():
   #agl_names=['10u', '10v']
   return [ParamAndLevel('t', 'Temperature', 'surface'),
       ParamAndLevel('acpcp', 'Convective precip', 'surface'),
-      ParamAndLevel('gust', 'Wind Gust', 'surface'),
-      ParamAndLevel('sdwe', 'Snow Depth', 'surface'),
+      #ParamAndLevel('gust', 'Wind Gust', 'surface'),
+      #ParamAndLevel('sdwe', 'Snow Depth', 'surface'),
       ParamAndLevel('10u', 'Wind Speed U', 'heightAboveGround'),
       ParamAndLevel('10v', 'Wind Speed V', 'heightAboveGround')]
 
 def default_level_map():
   return {'air_temp': ParamAndLevel('t', 'Temperature', 'surface'),
   'precip': ParamAndLevel('acpcp', 'Convective precip', 'surface'),
-  'wind_gust': ParamAndLevel('gust', 'Wind Gust', 'surface'),
-  'snow_depth': ParamAndLevel('sdwe', 'Snow Depth', 'surface'),
+  #'wind_gust': ParamAndLevel('gust', 'Wind Gust', 'surface'),
+  #'snow_depth': ParamAndLevel('sdwe', 'Snow Depth', 'surface'),
   'wind_u':  ParamAndLevel('10u', 'Wind Speed U', 'heightAboveGround'),
   'wind_v':  ParamAndLevel('10v', 'Wind Speed V', 'heightAboveGround')}
 
@@ -91,6 +91,9 @@ class RecordDB:
   def commit(self):
     self.session.commit()
 
+  def close(self):
+    self.session.close()
+
   def add_records(self, measurements):
     session = self.make_session()
     for meas in measurements:
@@ -113,12 +116,16 @@ class RecordDB:
   def air_temps(self, loc, start, end):
     return self.measurements(loc, lambda m: (m.date, m.air_temp), start, end)
 
+  def wind_speed(self, loc, start, end):
+    return self.measurements(loc, lambda m: (m.date, m.wind_speed), start, end)
+
   def measurements(self, loc, param_lambd, start, end):
     session = self.make_session()
     meas = session.query(Measurement).filter(and_(Measurement.location_id == loc.id,
       Measurement.date > start,
-      Measurement.date < end))
-    return np.array([ param_lambd(m) for m in meas])
+      Measurement.date < end)).order_by(Measurement.date)
+    pairs = np.array([ param_lambd(m) for m in meas])
+    return np.transpose(pairs)
 
   def populate_dc_locs(self):
     session = self.make_session()
