@@ -16,6 +16,7 @@
     </script>
 <script type="text/javascript">
 var map;
+var infowindow = null;
 
 function initialize() {
   var mapOptions = {
@@ -37,16 +38,49 @@ var marker = [];
     title:"{{ loc.name }}"
   });
   google.maps.event.addListener(marker[ {{ loop.index0 }} ], 'click', function() {
-    var infowindow = new google.maps.InfoWindow({ content: "<h3>{{ loc.name }}</h3>{{ loc.lat }}, {{ loc.lon }}" });
+    if (infowindow != null){
+      infowindow.close();
+    }
+    infowindow = new google.maps.InfoWindow({ content: "<h3>{{ loc.name }}</h3>{{ loc.lat }}, {{ loc.lon }}" });
     infowindow.open(map,marker[ {{ loop.index0 }} ]);
-    show_details({{ loc.id }})
+    show_details({{ loc.id }}, "{{ loc.name }}", {{loc.lat}}, {{loc.lon}})
     });
 {% endfor %}
 {% endif %}
 }
 
-function show_details(loc){
-  $("#details").toggle();
+function kelv_to_fahr(k){
+  return ((k - 273.15) * 1.8) + 32.0;
+}
+
+function build_data_table(json){
+  data = [];
+  data[0] = ['Date', 'Temperature'];
+  for(i=1;i<json.dates.length;i++){
+    data[i] = [new Date(json.dates[i-1]), kelv_to_fahr(json.temps[i-1])];
+  }
+  return data;
+}
+
+function show_details(loc_id, loc_name, loc_lat, loc_lon){
+  $("#loc_name").text(loc_name);
+  $("#loc_coords").text(loc_lat + ", " + loc_lon);
+  $.getJSON('http://localhost:5000/location/'+loc_id+'/temp', {}, function(json){
+      show_data(build_data_table(json))
+  });
+  show_data();
+}
+
+function show_data(data_table){
+  var temp_data = google.visualization.arrayToDataTable(data_table);
+//      [['Date', 'Air Temperature'],
+//      [new Date(2014, 1, 5), 30],
+//      [new Date(2014, 1,6), 40]]);
+  new google.visualization.LineChart(document.getElementById('chart')).
+      draw(temp_data, {curveType: "function",
+                  width: 800, height: 300,
+                  vAxis: {maxValue: 10}}
+          );
 }
 
 
@@ -62,8 +96,16 @@ window.onload = initialize;
 <div id="map_canvas" style="width:100%; height:60%"></div>
 
 <div id="details">
-  Details
-<div id="temp_chart" style="width:90%; height:40%"></div>
+  <div id="loc_name">
+
+  </div>
+  <div id="loc_coords">
+  </div>
+  <div id="debug_">
+    Debug info
+  </div>
+</div>
+<div id="chart" style="width:90%; height:40%"></div>
 </div>
 
 

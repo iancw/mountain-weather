@@ -1,7 +1,8 @@
 from flask import Flask, request, session, g, redirect, url_for, \
-    abort, render_template, flash
+    abort, render_template, flash, jsonify
 
 import record_db
+from datetime import datetime, timedelta
 
 DATABASE = 'test.db'
 DEBUG = True
@@ -27,6 +28,17 @@ def teardown_request(exception):
 def index():
   locs = g.db.locs()
   return render_template('index.html', locations=locs)
+
+@app.route('/location/<int:loc_id>/temp')
+def get_temperature(loc_id):
+  start = request.args.get('from', '')
+  end = request.args.get('to', '')
+  end = datetime.now()
+  start = end - timedelta(weeks=2)
+  loc = g.db.locs()[loc_id]
+  #return "From: {0}, to:{1} for loc: {2}".format(start, end, loc.name)
+  dates, temps = g.db.air_temps(loc, start, end)
+  return jsonify({'dates': dates.tolist(), 'temps': temps.tolist()})
 
 
 if __name__ == '__main__':
