@@ -38,8 +38,7 @@ def index():
   start_str = start.strftime("%m/%d/%Y")
   return render_template('index.html', locations=locs, start=start_str, end=end_str)
 
-@app.route('/location/<int:loc_id>/temp')
-def get_temperature(loc_id):
+def help_start_end(request):
   start = urllib2.unquote(request.args.get('start', ''))
   end = urllib2.unquote(request.args.get('end', ''))
   if not end:
@@ -50,11 +49,21 @@ def get_temperature(loc_id):
     start, tmp =start_end()
   else:
     start = datetime.strptime(start, '%m/%d/%Y')
+  return start, end
+
+@app.route('/location/<int:loc_id>/temp')
+def get_temperature(loc_id):
+  start, end = help_start_end(request)
   loc = g.db.locs()[loc_id-1]
-  #return "From: {0}, to:{1} for loc: {2}".format(start, end, loc.name)
   dates, temps = g.db.air_temps(loc, start, end)
   return jsonify({'dates': dates.tolist(), 'temps': temps.tolist()})
 
+@app.route('/location/<int:loc_id>/wind')
+def get_winds(loc_id):
+  start, end = help_start_end(request)
+  loc = g.db.locs()[loc_id-1]
+  dates, winds = g.db.wind_speed(loc, start, end)
+  return jsonify({'dates': dates.tolist(), 'winds': winds.tolist()})
 
 if __name__ == '__main__':
   app.run()

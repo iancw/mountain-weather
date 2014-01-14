@@ -17,10 +17,19 @@
       google.load('visualization', '1', {packages: ['corechart']});
     </script>
     <link rel="stylesheet" type="text/css" href="mystyle.css">
+    <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
 <script type="text/javascript">
 var map;
 var infowindow = null;
 var cur_loc;
+var chart;
 
 function initialize() {
   var mapOptions = {
@@ -59,7 +68,7 @@ function kelv_to_fahr(k){
   return ((k - 273.15) * 1.8) + 32.0;
 }
 
-function build_data_table(json){
+function build_temp_table(json){
   data = [];
   data[0] = ['Date', 'Temperature'];
   for(i=1;i<json.dates.length;i++){
@@ -67,9 +76,18 @@ function build_data_table(json){
   }
   return data;
 }
+function build_wind_table(json){
+  data = [];
+  data[0] = ['Date', 'Wind Speed'];
+  for(i=1;i<json.dates.length;i++){
+    data[i] = [new Date(json.dates[i-1]), json.winds[i-1]];
+  }
+  return data;
+}
 
-function build_query(loc_id){
-  return 'http://localhost:5000/location/'+loc_id+'/temp';
+// type: 'temp' or 'wind'
+function build_query(loc_id, type){
+  return 'http://localhost:5000/location/'+loc_id+'/'+type;
 }
 
 function query_params(){
@@ -81,17 +99,31 @@ function show_details(loc){
   if (loc == null){
     return;
   }
-  $("#loc_name").text(loc.name);
-  $("#loc_coords").text(loc.lat + ", " + loc.lon);
+  //$("#loc_name").text(loc.name);
+  //$("#loc_coords").text(loc.lat + ", " + loc.lon);
 }
 
+// Updates data for any checked item
 function update_data(){
   if (cur_loc == null){
     return;
   }
+  chart = new google.visualization.LineChart(document.getElementById('chart'));
+  if ($( "#wnd_chk" ).val() == "1"){
+    update_line('wind', build_wind_table);
+  }
+  if ($( "#tmp_chk" ).val() == "1"){
+    update_line('temp', build_temp_table);
+  }
+}
+
+function update_line(type, table_func){
+  if (cur_loc == null){
+    return;
+  }
   loc_id = cur_loc.id
-  $.getJSON(build_query(loc_id), query_params(), function(json){
-    show_data(build_data_table(json));
+  $.getJSON(build_query(loc_id, type), query_params(), function(json){
+    show_data(table_func(json));
   });
 
 }
@@ -101,8 +133,7 @@ function show_data(data_table){
 //      [['Date', 'Air Temperature'],
 //      [new Date(2014, 1, 5), 30],
 //      [new Date(2014, 1,6), 40]]);
-  new google.visualization.LineChart(document.getElementById('chart')).
-    draw(temp_data, {curveType: "function"});
+  chart.draw(temp_data, {curveType: "function", title: cur_loc.name+' ('+cur_loc.lat+", "+cur_loc.lon+')'});
 }
 
 $(function() {
@@ -112,6 +143,22 @@ $(function() {
     $( "#endpicker" ).datepicker();
     });
 
+$(function() {$('.btn').button(); });
+
+$(function() {
+  $("#wnd_chk_btn").click(function(){
+    var last_val = $("#wnd_chk").val();
+    $("#wnd_chk").val( last_val == "0" ? "1" : "0");
+     update_data();
+    });
+  });
+$(function() {
+  $("#tmp_chk_btn").click(function(){
+    var last_val = $("#tmp_chk").val();
+    $("#tmp_chk").val( last_val == "0" ? "1" : "0");
+     update_data();
+    });
+  });
 
 window.onload = initialize;
 </script>
@@ -124,19 +171,23 @@ window.onload = initialize;
 
 <div id="map_canvas" style="width:100%; height:60%"></div>
 
-<div id="details">
-  <div id="loc_name">
-  </div>
-  <div id="loc_coords">
-  </div>
-  <div id="debug_">
-  </div>
-</div>
 <div id="chart_controls">
-  <div id="top_controls"> </div>
+  <div id="top_controls">
+  </div>
   <div id="chart"></div>
   <div id="bottom_controls">
     <div id="start_area">Start: <input type="text" value="{{ start }}" id="startpicker" onchange="update_data()"></div>
+    <div class="btn-group" data-toggle="buttons" id="data_buttons">
+    <label class="btn btn-primary active" id="tmp_chk_btn">
+      <input type="checkbox" id="tmp_chk" value="1">Temperature
+    </label>
+    <label class="btn btn-primary" id="wnd_chk_btn">
+      <input type="checkbox" id="wnd_chk" value="0">Wind Speed
+    </label>
+    <label class="btn btn-primary">
+      <input type="checkbox" id="snow_chk" value="0">Snow Fall
+    </label>
+  </div>
     <div id="end_area">End: <input type="text" value="{{ end }}" id="endpicker" onchange="update_data()"></div>
   </div>
 </div>
