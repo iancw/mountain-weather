@@ -1,0 +1,15 @@
+#chart_controls {
+  float:right;
+  width:80%;
+}
+#start_area{
+  float:left;
+  padding-left:90px;
+}
+#end_area{
+  float:right;
+  padding-right:90px;
+}
+#details {
+  float:left;
+}

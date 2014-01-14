@@ -8,20 +8,24 @@
       #map_canvas { height: 60% }
     </style>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" ></script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAAQDOZpCb33qnlU5xcBmf_n8CQ4p_qg6s&sensor=false">
     </script>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
     <script type="text/javascript">
       google.load('visualization', '1', {packages: ['corechart']});
     </script>
+    <link rel="stylesheet" type="text/css" href="mystyle.css">
 <script type="text/javascript">
 var map;
 var infowindow = null;
+var cur_loc;
 
 function initialize() {
   var mapOptions = {
-    center: new google.maps.LatLng(38.783360, -78.295143),
-    zoom: 14,
+    center: new google.maps.LatLng(41.5, -77.0),
+    zoom: 6,
     mapTypeId: google.maps.MapTypeId.TERRAIN
   };
   map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
@@ -43,7 +47,9 @@ var marker = [];
     }
     infowindow = new google.maps.InfoWindow({ content: "<h3>{{ loc.name }}</h3>{{ loc.lat }}, {{ loc.lon }}" });
     infowindow.open(map,marker[ {{ loop.index0 }} ]);
-    show_details({{ loc.id }}, "{{ loc.name }}", {{loc.lat}}, {{loc.lon}})
+    cur_loc = {id: {{ loc.id }}, name: "{{loc.name}}", lat: {{loc.lat}}, lon: {{loc.lon}}};
+    show_details(cur_loc);
+    update_data();
     });
 {% endfor %}
 {% endif %}
@@ -62,13 +68,32 @@ function build_data_table(json){
   return data;
 }
 
-function show_details(loc_id, loc_name, loc_lat, loc_lon){
-  $("#loc_name").text(loc_name);
-  $("#loc_coords").text(loc_lat + ", " + loc_lon);
-  $.getJSON('http://localhost:5000/location/'+loc_id+'/temp', {}, function(json){
-      show_data(build_data_table(json))
+function build_query(loc_id){
+  return 'http://localhost:5000/location/'+loc_id+'/temp';
+}
+
+function query_params(){
+  var map = {"start":encodeURIComponent($("#startpicker").val()), "end": encodeURIComponent($("#endpicker").val()) };
+  return map;
+}
+
+function show_details(loc){
+  if (loc == null){
+    return;
+  }
+  $("#loc_name").text(loc.name);
+  $("#loc_coords").text(loc.lat + ", " + loc.lon);
+}
+
+function update_data(){
+  if (cur_loc == null){
+    return;
+  }
+  loc_id = cur_loc.id
+  $.getJSON(build_query(loc_id), query_params(), function(json){
+    show_data(build_data_table(json));
   });
-  show_data();
+
 }
 
 function show_data(data_table){
@@ -77,11 +102,15 @@ function show_data(data_table){
 //      [new Date(2014, 1, 5), 30],
 //      [new Date(2014, 1,6), 40]]);
   new google.visualization.LineChart(document.getElementById('chart')).
-      draw(temp_data, {curveType: "function",
-                  width: 800, height: 300,
-                  vAxis: {maxValue: 10}}
-          );
+    draw(temp_data, {curveType: "function"});
 }
+
+$(function() {
+    $( "#startpicker" ).datepicker();
+    });
+$(function() {
+    $( "#endpicker" ).datepicker();
+    });
 
 
 window.onload = initialize;
@@ -97,15 +126,19 @@ window.onload = initialize;
 
 <div id="details">
   <div id="loc_name">
-
   </div>
   <div id="loc_coords">
   </div>
   <div id="debug_">
-    Debug info
   </div>
 </div>
-<div id="chart" style="width:90%; height:40%"></div>
+<div id="chart_controls">
+  <div id="top_controls"> </div>
+  <div id="chart"></div>
+  <div id="bottom_controls">
+    <div id="start_area">Start: <input type="text" value="{{ start }}" id="startpicker" onchange="update_data()"></div>
+    <div id="end_area">End: <input type="text" value="{{ end }}" id="endpicker" onchange="update_data()"></div>
+  </div>
 </div>
 
 

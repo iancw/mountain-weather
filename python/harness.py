@@ -46,10 +46,10 @@ class Updater:
         wind_speed=grb.wind_speed(loc.lat, loc.lon),
         location_id=loc.id)
 
-def up_to_now(self):
+def up_to_now():
   season_start = datetime.datetime(2014, 1, 4, 16)
   now = datetime.datetime.utcnow()
-  ensure_dta_between(season_start, now)
+  ensure_data_between(season_start, now)
 
 def ensure_data_between(s, e):
   need_init = False
@@ -84,5 +84,6 @@ def query_temps():
   plt.show()
 
 if __name__ == '__main__':
-  query_temps()
+  #query_temps()
+  up_to_now()
 
