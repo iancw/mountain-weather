@@ -74,7 +74,7 @@ function build_table(json){
     chart.clearChart();
     return;
   }
-  data.addColumn('date', 'Date');
+  data.addColumn('datetime', 'Date');
   var vax = {};
   var axes = 0;
   var ser = {};
@@ -82,16 +82,19 @@ function build_table(json){
     if (key == 'dates'){
       continue;
     }
-    vax[axes] = {logScale: false};
-    ser[axes] = {targetAxisIndex: axes};
-    axes = axes + 1;
+    units = '';
     if (key == 'temps'){
       data.addColumn('number', 'Temperature');
+      units = 'F';
     }else if (key == 'winds'){
       data.addColumn('number', 'Wind Speed');
+      units = 'mph';
     }else{
       data.addColumn('number', key);
     }
+    vax[axes] = {title: units, logScale: false};
+    ser[axes] = {targetAxisIndex: axes};
+    axes = axes + 1;
   }
   for (var i=0; i<json.dates.length; i++){
     var row = [];
@@ -105,7 +108,7 @@ function build_table(json){
   }
 
   chart.draw(data, {curveType: "function", 
-      title: cur_loc.name+' ('+cur_loc.lat+", "+cur_loc.lon+')',
+      title: cur_loc.name+' ('+cur_loc.lat.toFixed(4)+", "+cur_loc.lon.toFixed(4)+')',
         vAxes: vax,
         series: ser});
 }
@@ -198,9 +201,6 @@ window.onload = initialize;
     </label>
     <label class="btn btn-primary" id="wnd_chk_btn">
       <input type="checkbox" id="wnd_chk" value="0">Wind Speed
-    </label>
-    <label class="btn btn-primary">
-      <input type="checkbox" id="snow_chk" value="0">Snow Fall
     </label>
   </div>
     <div id="end_area">End: <input type="text" value="{{ end }}" id="endpicker" onchange="update_data()"></div>

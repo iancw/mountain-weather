@@ -4,6 +4,7 @@ from flask import Flask, request, session, g, redirect, url_for, \
 import record_db
 from datetime import datetime, timedelta
 import urllib2
+import numpy as np
 
 DATABASE = 'test.db'
 DEBUG = True
@@ -59,11 +60,11 @@ def get_data(loc_id):
   if request.args.get('temps') == '1':
     dates, temps = g.db.air_temps(loc, start, end)
     data['dates'] = dates.tolist()
-    data['temps'] = temps.tolist()
+    data['temps'] = np.around(temps.astype(float), decimals=1).tolist()
   if request.args.get('winds') == '1':
     dates, winds = g.db.wind_speed(loc, start, end)
     data['dates'] = dates.tolist()
-    data['winds'] = winds.tolist()
+    data['winds'] = np.around(winds.astype(float), decimals=1).tolist()
 
   return jsonify(data)
 
