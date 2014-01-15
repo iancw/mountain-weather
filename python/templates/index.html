@@ -68,31 +68,51 @@ function kelv_to_fahr(k){
   return ((k - 273.15) * 1.8) + 32.0;
 }
 
-function build_temp_table(json){
-  data = [];
-  data[0] = ['Date', 'Temperature'];
-  for(i=1;i<json.dates.length;i++){
-    data[i] = [new Date(json.dates[i-1]), kelv_to_fahr(json.temps[i-1])];
+function build_table(json){
+  var data = new google.visualization.DataTable();
+  if (typeof json.dates == "undefined"){
+    chart.clearChart();
+    return;
   }
-  return data;
-}
-function build_wind_table(json){
-  data = [];
-  data[0] = ['Date', 'Wind Speed'];
-  for(i=1;i<json.dates.length;i++){
-    data[i] = [new Date(json.dates[i-1]), json.winds[i-1]];
+  data.addColumn('date', 'Date');
+  var vax = {};
+  var axes = 0;
+  var ser = {};
+  for (var key in json){
+    if (key == 'dates'){
+      continue;
+    }
+    vax[axes] = {logScale: false};
+    ser[axes] = {targetAxisIndex: axes};
+    axes = axes + 1;
+    if (key == 'temps'){
+      data.addColumn('number', 'Temperature');
+    }else if (key == 'winds'){
+      data.addColumn('number', 'Wind Speed');
+    }else{
+      data.addColumn('number', key);
+    }
   }
-  return data;
+  for (var i=0; i<json.dates.length; i++){
+    var row = [];
+    row[row.length] = new Date(json.dates[i]);
+    for (var key in json){
+      if (key != 'dates'){
+        row[row.length] = json[key][i];
+      }
+    }
+    data.addRow(row);
+  }
+
+  chart.draw(data, {curveType: "function", 
+      title: cur_loc.name+' ('+cur_loc.lat+", "+cur_loc.lon+')',
+        vAxes: vax,
+        series: ser});
 }
 
 // type: 'temp' or 'wind'
 function build_query(loc_id, type){
-  return 'http://localhost:5000/location/'+loc_id+'/'+type;
-}
-
-function query_params(){
-  var map = {"start":encodeURIComponent($("#startpicker").val()), "end": encodeURIComponent($("#endpicker").val()) };
-  return map;
+  return 'http://localhost:5000/location/'+loc_id+'/data';
 }
 
 function show_details(loc){
@@ -108,32 +128,27 @@ function update_data(){
   if (cur_loc == null){
     return;
   }
-  chart = new google.visualization.LineChart(document.getElementById('chart'));
+  if (chart == null){
+    chart = new google.visualization.LineChart(document.getElementById('chart'));
+  }
+  var params = {"start":encodeURIComponent($("#startpicker").val()), "end": encodeURIComponent($("#endpicker").val()) };
   if ($( "#wnd_chk" ).val() == "1"){
-    update_line('wind', build_wind_table);
+    params['winds']='1';
   }
   if ($( "#tmp_chk" ).val() == "1"){
-    update_line('temp', build_temp_table);
+    params['temps']='1';
   }
+  update_chart_async(params);
 }
 
-function update_line(type, table_func){
+function update_chart_async(params, table_func){
   if (cur_loc == null){
     return;
   }
   loc_id = cur_loc.id
-  $.getJSON(build_query(loc_id, type), query_params(), function(json){
-    show_data(table_func(json));
+  $.getJSON(build_query(loc_id), params, function(json){
+    build_table(json);
   });
-
-}
-
-function show_data(data_table){
-  var temp_data = google.visualization.arrayToDataTable(data_table);
-//      [['Date', 'Air Temperature'],
-//      [new Date(2014, 1, 5), 30],
-//      [new Date(2014, 1,6), 40]]);
-  chart.draw(temp_data, {curveType: "function", title: cur_loc.name+' ('+cur_loc.lat+", "+cur_loc.lon+')'});
 }
 
 $(function() {

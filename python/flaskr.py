@@ -51,19 +51,21 @@ def help_start_end(request):
     start = datetime.strptime(start, '%m/%d/%Y')
   return start, end
 
-@app.route('/location/<int:loc_id>/temp')
-def get_temperature(loc_id):
+@app.route('/location/<int:loc_id>/data')
+def get_data(loc_id):
   start, end = help_start_end(request)
   loc = g.db.locs()[loc_id-1]
-  dates, temps = g.db.air_temps(loc, start, end)
-  return jsonify({'dates': dates.tolist(), 'temps': temps.tolist()})
+  data = {}
+  if request.args.get('temps') == '1':
+    dates, temps = g.db.air_temps(loc, start, end)
+    data['dates'] = dates.tolist()
+    data['temps'] = temps.tolist()
+  if request.args.get('winds') == '1':
+    dates, winds = g.db.wind_speed(loc, start, end)
+    data['dates'] = dates.tolist()
+    data['winds'] = winds.tolist()
 
-@app.route('/location/<int:loc_id>/wind')
-def get_winds(loc_id):
-  start, end = help_start_end(request)
-  loc = g.db.locs()[loc_id-1]
-  dates, winds = g.db.wind_speed(loc, start, end)
-  return jsonify({'dates': dates.tolist(), 'winds': winds.tolist()})
+  return jsonify(data)
 
 if __name__ == '__main__':
   app.run()

@@ -11,6 +11,9 @@ import numpy as np
 
 Base = declarative_base()
 
+def kelv_to_fahr(k):
+  return ((k - 273.15) * 1.8) + 32.0;
+
 class Location(Base):
   __tablename__ = "location"
 
@@ -114,7 +117,7 @@ class RecordDB:
     return Session()
 
   def air_temps(self, loc, start, end):
-    return self.measurements(loc, lambda m: (m.date, m.air_temp), start, end)
+    return self.measurements(loc, lambda m: (m.date, kelv_to_fahr(m.air_temp)), start, end)
 
   def wind_speed(self, loc, start, end):
     return self.measurements(loc, lambda m: (m.date, m.wind_speed), start, end)
