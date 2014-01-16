@@ -14,7 +14,6 @@ PASSWORD = 'default'
 
 app = Flask(__name__, static_folder='static', static_url_path='')
 app.config.from_object(__name__)
-# alternately:  app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 @app.before_request
 def before_request():
