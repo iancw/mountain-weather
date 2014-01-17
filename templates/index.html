@@ -115,7 +115,7 @@ function build_table(json){
 
 // type: 'temp' or 'wind'
 function build_query(loc_id, type){
-  return 'http://localhost:5000/location/'+loc_id+'/data';
+  return '/location/'+loc_id+'/data';
 }
 
 function show_details(loc){
