@@ -128,8 +128,7 @@ class RecordDB:
     return measurements[0].date
 
   def make_session(self):
-    Session = sessionmaker(bind=self.engine)
-    return Session()
+    return self.session
 
   def air_temps(self, loc, start, end):
     return self.measurements(loc, lambda m: (m.date, kelv_to_fahr(m.air_temp)), start, end)
