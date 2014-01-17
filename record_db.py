@@ -5,6 +5,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Float
 from sqlalchemy import func
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, backref
+from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy import desc
 from sqlalchemy import and_
 import numpy as np
@@ -21,7 +22,7 @@ class Location(Base):
   __tablename__ = "location"
 
   id = Column(Integer, primary_key=True)
-  name = Column(String)
+  name = Column(String, unique=True)
   lat = Column(Float)
   lon = Column(Float)
 
@@ -30,6 +31,7 @@ class Location(Base):
 
 class Measurement(Base):
   __tablename__ = 'measurement'
+  __table_args__ = (UniqueConstraint('date', 'location_id', name='_date_loc_uc'))
 
   id = Column(Integer, primary_key=True)
   date = Column(DateTime)
