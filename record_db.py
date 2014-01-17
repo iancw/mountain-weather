@@ -9,8 +9,12 @@ from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy import desc
 from sqlalchemy import and_
 import numpy as np
+from psycopg2.extensions import register_adapter, AsIs
 
 Base = declarative_base()
+
+register_adapter(np.float32, lambda x: AsIs(x))
+
 
 def kelv_to_fahr(k):
   return ((k - 273.15) * 1.8) + 32.0

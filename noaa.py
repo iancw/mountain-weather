@@ -75,8 +75,6 @@ class NOAAFetch:
   def __init__(self, path_builder, base='.'):
     self.path_builder = path_builder
     self.data_dir = base
-    if not os.path.exists(self.data_dir):
-      os.mkdir(self.data_dir)
 
   def download_time(self, dt):
     path=self.path_builder.build_path(dt)

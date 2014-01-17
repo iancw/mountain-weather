@@ -1,4 +1,4 @@
-from fetch_hrrr import NOAAFetch, HRRR, RAP, NAM
+from noaa import NOAAFetch, HRRR, RAP, NAM
 import download
 import sub_grib
 import os.path
@@ -10,12 +10,14 @@ from record_db import default_levels
 import re
 from grib import Grib
 
+
+
 class Hybrid:
 
-  def __init__(self):
-    self.hrrr = NOAAFetch(HRRR(), base='../hrrr')
-    self.rap = NOAAFetch(RAP(), base='../rap')
-    self.nam = NOAAFetch(NAM(), base='../nam')
+  def __init__(self, data_dir):
+    self.hrrr = NOAAFetch(HRRR(), base='{0}/hrrr'.format(data_dir))
+    self.rap = NOAAFetch(RAP(), base='{0}/rap'.format(data_dir))
+    self.nam = NOAAFetch(NAM(), base='{0}/nam'.format(data_dir))
 
   def fetch_time(self, dtime):
     '''
@@ -43,7 +45,7 @@ class GribDatabase:
     self.data_dir = data_dir
     self.params = params
     self.date_fmt='%Y_%m_%d_%H%M'
-    self.fetcher = Hybrid()
+    self.fetcher = Hybrid(data_dir)
 
   def leaf_name(self, dt):
     return "{0}.grb2".format(dt.strftime(self.date_fmt))

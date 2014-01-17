@@ -13,6 +13,9 @@ import os
 def db_connect():
   return record_db.connect(os.environ.get('DATABASE_URL'))
 
+def data_folder():
+  return os.environ.get('DATA_FOLDER')
+
 class Updater:
 
   def __init__(self, db, gribs):
@@ -56,13 +59,8 @@ def up_to_now():
   ensure_data_between(season_start, now)
 
 def ensure_data_between(s, e):
-  need_init = False
-  if not os.path.exists('test.db'):
-    need_init = True
   db = db_connect()
-  if need_init:
-    record_db.init_database(db)
-  gribs = GribDatabase('../data/')
+  gribs = GribDatabase(data_folder())
   u = Updater(db, gribs)
   u.fetch_data_between(s, e)
 

@@ -1,3 +1,3 @@
 web: gunicorn weather:app
-update: python harness.py
+update: python update.py
 init: python init.py
