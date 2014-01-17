@@ -1,6 +1,6 @@
 import record_db
 from record_db import Measurement
-from data_abs import GribDatabase
+from grib_db import GribDatabase
 import datetime
 import os.path
 import urllib2
