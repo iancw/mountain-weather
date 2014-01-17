@@ -8,6 +8,10 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import traceback
+import os
+
+def db_connect():
+  return record_db.connect(os.environ.get('DATABASE_URL'))
 
 class Updater:
 
@@ -55,7 +59,7 @@ def ensure_data_between(s, e):
   need_init = False
   if not os.path.exists('test.db'):
     need_init = True
-  db = record_db.connect("sqlite:///test.db")
+  db = db_connect()
   if need_init:
     record_db.init_database(db)
   gribs = GribDatabase('../data/')
@@ -74,7 +78,7 @@ def plot_temp(db, loc, s, e):
   plt.plot(dates, temps)
 
 def query_temps():
-  db = record_db.connect("sqlite:///test.db")
+  db = db_connect()
   kat = db.locs()[-2]
   s = datetime.datetime(2014, 1, 1, 0)
   e = datetime.datetime(2014, 1, 11, 0)

@@ -5,6 +5,7 @@ import record_db
 from datetime import datetime, timedelta
 import urllib2
 import numpy as np
+import os
 
 DATABASE = 'test.db'
 DEBUG = True
@@ -17,7 +18,7 @@ app.config.from_object(__name__)
 
 @app.before_request
 def before_request():
-  g.db = record_db.connect('sqlite:///test.db')
+  g.db = record_db.connect(os.environ['DATABASE_URL'])#'sqlite:///test.db')
 
 @app.teardown_request
 def teardown_request(exception):

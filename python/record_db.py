@@ -63,10 +63,16 @@ def default_level_map():
   'wind_u':  ParamAndLevel('10u', 'Wind Speed U', 'heightAboveGround'),
   'wind_v':  ParamAndLevel('10v', 'Wind Speed V', 'heightAboveGround')}
 
-
 def connect(db_url):
   engine = create_engine(db_url, echo=False)
   return RecordDB(engine)
+
+def create_database(db_url, db_name):
+  engine = create_engine(db_url+"postgres", echo=False)
+  conn = engine.connect()
+  conn.execute("commit")
+  conn.execute("create database " + db_name)
+  conn.close()
 
 def init_database(rec_db):
   Base.metadata.create_all(rec_db.engine)
