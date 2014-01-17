@@ -31,7 +31,7 @@ class Location(Base):
 
 class Measurement(Base):
   __tablename__ = 'measurement'
-  __table_args__ = (UniqueConstraint('date', 'location_id', name='_date_loc_uc'))
+  __table_args__ = (UniqueConstraint('date', 'location_id', name='_date_loc_uc'),)
 
   id = Column(Integer, primary_key=True)
   date = Column(DateTime)
@@ -145,10 +145,13 @@ class RecordDB:
     session = self.make_session()
     session.add(Location(name='Overall Falls', lat=38.783360, lon=-78.295143))
     session.add(Location(name='Lewis Spring Falls', lat=38.520638, lon=-78.450539))
-    session.add(Location(name='White oak canyon', lat=38.555984, lon=-78.353889))
+    session.add(Location(name='White Oak Canyon', lat=38.555984, lon=-78.353889))
     session.add(Location(name='Finleys Folly', lat=37.911125, lon=-78.973633))
     session.add(Location(name='Hawksbill', lat=38.596, lon=-78.259)) # Grid cell 470,227
     session.add(Location(name='Katahdin', lat=45.9044, lon=-68.8213))
     session.add(Location(name='Mt. Washington', lat=44.2705, lon=-71.3032))
+    session.add(Location(name='Gothics', lat=44.128659, lon=-73.857542))
+    session.add(Location(name='The Narrows', lat=40.563316, lon=-75.157638))
+    session.add(Location(name='White Grass', lat=39.007151, lon=-79.437599))
     session.commit()
 
