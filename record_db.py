@@ -150,7 +150,7 @@ class RecordDB:
     session.add(Location(name='Lewis Spring Falls', lat=38.520638, lon=-78.450539))
     session.add(Location(name='White Oak Canyon', lat=38.555984, lon=-78.353889))
     session.add(Location(name='Finleys Folly', lat=37.911125, lon=-78.973633))
-    session.add(Location(name='Hawksbill', lat=38.596, lon=-78.259)) # Grid cell 470,227
+    session.add(Location(name='Hawksbill', lat=38.556441, lon=-78.393894))
     session.add(Location(name='Katahdin', lat=45.9044, lon=-68.8213))
     session.add(Location(name='Mt. Washington', lat=44.2705, lon=-71.3032))
     session.add(Location(name='Gothics', lat=44.128659, lon=-73.857542))
