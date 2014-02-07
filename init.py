@@ -6,7 +6,7 @@ def db_url():
 
 def init_db():
   db = record_db.connect(db_url())
-  record_db.init_database(db)
+  db.create_tables()
 
 
 if __name__ == '__main__':

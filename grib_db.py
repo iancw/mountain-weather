@@ -5,8 +5,7 @@ import os.path
 from datetime import *
 import urllib2
 import pygrib
-from record_db import ParamAndLevel
-from record_db import default_levels
+from model import ParamAndLevel, default_levels
 import re
 from grib import Grib
 

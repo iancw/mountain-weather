@@ -2,8 +2,8 @@ import pygrib
 import datetime
 import numpy as np
 
-from record_db import ParamAndLevel
-from record_db import default_levels, default_level_map
+from model import ParamAndLevel
+from model import default_levels, default_level_map
 
 
 def date_from_rec(grb):
