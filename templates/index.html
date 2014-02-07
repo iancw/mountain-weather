@@ -106,13 +106,13 @@ function build_table(json){
     }
     data.addRow(row);
   }
-  var format = new google.visualization.DateFormat({pattern: "EEE, MMM d, ''yy"});
+  var format = new google.visualization.DateFormat({pattern: "EEE, MMM d, h a"});
   format.format(data, 0);
 
   chart.draw(data, {curveType: "function", 
       title: cur_loc.name+' ('+cur_loc.lat.toFixed(4)+", "+cur_loc.lon.toFixed(4)+')',
         vAxes: vax,
-        hAxis: {format: "EEE, MMM d, ''yy"},
+        hAxis: {format: "EEE, MMM d"},
         series: ser});
 }
 
