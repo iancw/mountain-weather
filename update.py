@@ -26,7 +26,7 @@ class Updater:
 
   def fetch_data_between(self, start, end):
     delta = datetime.timedelta(hours=1)
-    cur = start
+    cur = start.replace(minute=0, second=0, microsecond=0)
     while cur < end:
       try:
         self.add_record(cur)
@@ -51,11 +51,12 @@ class Updater:
     return Measurement(date=dtime,
         air_temp=grb.temperature(loc.lat, loc.lon),
         wind_speed=grb.wind_speed(loc.lat, loc.lon),
+        precip=grb.precip(loc.lat, loc.lon),
         location_id=loc.id)
 
 def up_to_now():
-  season_start = datetime.datetime(2014, 1, 4, 16)
   now = datetime.datetime.utcnow()
+  season_start = now - datetime.timedelta(days=7)
   ensure_data_between(season_start, now)
 
 def ensure_data_between(s, e):

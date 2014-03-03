@@ -47,6 +47,7 @@ class Measurement(Base):
   date = Column(DateTime)
   air_temp = Column(Float)
   wind_speed = Column(Float)
+  precip = Column(Float)
   location_id = Column(Integer, ForeignKey('location.id'))
 
   location = relationship("Location", backref=backref('measurements', order_by=date))

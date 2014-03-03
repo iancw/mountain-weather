@@ -46,3 +46,7 @@ class Grib:
     v = self.value(default_level_map()['wind_v'], lat, lon)
     return np.sqrt(u*u + v*v)
 
+  def precip(self, lat, lon):
+    return self.value(default_level_map()['precip'], lat, lon)
+
+
