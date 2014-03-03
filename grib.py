@@ -11,6 +11,22 @@ def date_from_rec(grb):
   + datetime.timedelta(hours=grb.startStep)
   return dt.replace(tzinfo=utc)
 
+def print_keys(rec):
+  for key in rec.keys():
+    try:
+      print "{0}: {1}".format(key, rec[key])
+    except (RuntimeError):
+      print "{0} not implemented".format(key)
+
+def print_key_diff(rec1, rec2):
+  for key in rec1.keys():
+    try:
+      if rec1[key] != rec2[key]:
+        print "{0}: rec1={1}, rec2={2}".format(key, rec1[key], rec2[key])
+    except (RuntimeError, ValueError):
+      print "{0} not implemented".format(key)
+
+
 class GribRec:
 
   def __init__(self, grb):
@@ -31,6 +47,13 @@ class Grib:
   def __init__(self, grb_file):
     self.grb_file = grb_file
     self.grbs = pygrib.open(grb_file)
+
+  def find(self, name):
+    return self.grbs.select(name=name)[0]
+
+  def get_rec(self, num):
+    self.grbs.seek(num-1)
+    return self.grbs.read(1)[0]
 
   def value(self, param_lev, lat, lon):
     self.grbs.seek(0)
