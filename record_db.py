@@ -7,7 +7,7 @@ from sqlalchemy import and_
 import numpy as np
 from psycopg2.extensions import register_adapter, AsIs
 from model import Location, Measurement, base
-from conv import kelv_to_fahr, mps_to_mph
+from conv import kelv_to_fahr, mps_to_mph, swe_to_in
 
 
 # for explanation, see http://rehalcon.blogspot.com/2010/03/sqlalchemy-programmingerror-cant-adapt.html
