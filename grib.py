@@ -57,19 +57,19 @@ class Grib:
 
   def value(self, param_lev, lat, lon):
     self.grbs.seek(0)
-    print "Searcing {2} for typeofLevel={0}, shortName={1}".format(param_lev.level, param_lev.shortName, self.grb_file)
-    grb = GribRec(self.grbs.select(typeOfLevel=param_lev.level, shortName=param_lev.shortName)[0])
+    #print "Searcing {2} for typeofLevel={0}, shortName={1}".format(param_lev.level, param_lev.shortName, self.grb_file)
+    grb = GribRec(param_lev.select(self.grbs)[0])
     return grb.value(lat, lon)
 
   def temperature(self, lat, lon):
     return self.value(default_level_map()['air_temp'], lat, lon)
 
   def wind_speed(self, lat, lon):
+    print "Finding wind_u..."
     u = self.value(default_level_map()['wind_u'], lat, lon)
     v = self.value(default_level_map()['wind_v'], lat, lon)
     return np.sqrt(u*u + v*v)
 
-  def precip(self, lat, lon):
-    return self.value(default_level_map()['precip'], lat, lon)
-
+  def snow(self, lat, lon):
+    return self.value(default_level_map()['snow'], lat, lon)
 

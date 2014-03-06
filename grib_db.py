@@ -107,10 +107,7 @@ class GribDatabase:
     grbs = pygrib.open(full_grib)
     for param in self.params:
       print 'finding {0} @ {1}'.format(param.shortName, param.level)
-      grbs.seek(0)
-      match_grbs = grbs.select(
-          shortName=param.shortName,
-          typeOfLevel=param.level)
+      match_grbs = param.select(grbs)
       for grb in match_grbs:
         grbout.write(grb.tostring())
     grbout.close()

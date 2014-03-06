@@ -85,8 +85,8 @@ class RecordDB:
   def wind_speed(self, loc, start, end):
     return self.measurements(loc, lambda m: (m.date, mps_to_mph(m.wind_speed)), start, end)
 
-  def precip(self, loc, start, end):
-    return self.measurements(loc, lambda m: (m.date, m.precip), start, end)
+  def snow(self, loc, start, end):
+    return self.measurements(loc, lambda m: (m.date, swe_to_in(m.snow)), start, end)
 
   def measurements(self, loc, param_lambd, start, end):
     session = self.make_session()

@@ -31,8 +31,10 @@ class Updater:
       try:
         self.add_record(cur)
         self.db.commit()
-      except (urllib2.HTTPError, ValueError):
+      except (urllib2.HTTPError):
         print "failed to download %s: %s" % (cur.strftime("%Y-%m-%d-%H%M"),  sys.exc_info())
+        traceback.print_exc()
+      except (ValueError):
         traceback.print_exc()
       cur = cur + delta
 
@@ -51,7 +53,7 @@ class Updater:
     return Measurement(date=dtime,
         air_temp=grb.temperature(loc.lat, loc.lon),
         wind_speed=grb.wind_speed(loc.lat, loc.lon),
-        precip=grb.precip(loc.lat, loc.lon),
+        snow=grb.snow(loc.lat, loc.lon),
         location_id=loc.id)
 
 def up_to_now():

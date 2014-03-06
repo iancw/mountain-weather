@@ -65,10 +65,10 @@ def get_data(loc_id):
     dates, winds = g.db.wind_speed(loc, start, end)
     data['dates'] = dates.tolist()
     data['winds'] = np.around(winds.astype(float), decimals=1).tolist()
-  if request.args.get('precip') == '1':
-    dates, precip = g.db.precip(loc, start, end)
+  if request.args.get('snow') == '1':
+    dates, snow = g.db.snow(loc, start, end)
     data['dates'] = dates.tolist()
-    data['precip'] = np.around(precip.astype(float), decimals=1).tolist()
+    data['snow'] = np.around(snow.astype(float), decimals=1).tolist()
 
   return jsonify(data)
 

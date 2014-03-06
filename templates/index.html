@@ -89,6 +89,9 @@ function build_table(json){
     }else if (key == 'winds'){
       data.addColumn('number', 'Wind Speed');
       units = 'mph';
+    }else if (key == 'snow'){
+      data.addColumn('number', 'Snow Depth');
+      units = 'in';
     }else{
       data.addColumn('number', key);
     }
@@ -144,8 +147,8 @@ function update_data(){
   if ($( "#tmp_chk" ).val() == "1"){
     params['temps']='1';
   }
-  if ($( "#pcp_chk" ).val() == "1"){
-    params['precip']='1';
+  if ($( "#sno_chk" ).val() == "1"){
+    params['snow']='1';
   }
   update_chart_async(params);
 }
@@ -184,9 +187,9 @@ $(function() {
     });
   });
 $(function() {
-  $("#pcp_chk_btn").click(function(){
-    var last_val = $("#pcp_chk").val();
-    $("#pcp_chk").val( last_val == "0" ? "1" : "0");
+  $("#sno_chk_btn").click(function(){
+    var last_val = $("#sno_chk").val();
+    $("#sno_chk").val( last_val == "0" ? "1" : "0");
      update_data();
     });
   });
@@ -214,8 +217,8 @@ window.onload = initialize;
     <label class="btn btn-primary" id="wnd_chk_btn">
       <input type="checkbox" id="wnd_chk" value="0">Wind Speed
     </label>
-    <label class="btn btn-primary" id="pcp_chk_btn">
-      <input type="checkbox" id="pcp_chk" value="0">Precipitation
+    <label class="btn btn-primary" id="sno_chk_btn">
+      <input type="checkbox" id="sno_chk" value="0">Snow Accumulation
     </label>
   </div>
     <div id="end_area">End: <input type="text" value="{{ end }}" id="endpicker" onchange="update_data()"></div>
