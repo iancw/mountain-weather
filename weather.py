@@ -29,7 +29,9 @@ def teardown_request(exception):
 def start_end():
   end = datetime.now()
   start = end - timedelta(weeks=1)
-  return (start, end)
+  #return (start, end)
+  # since data updates are not longer live, hard-code dates where data is avilable
+  return (datetime(2014, 3, 8), datetime(2015, 5, 22))
 
 @app.route('/')
 def index():
